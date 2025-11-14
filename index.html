@@ -1,0 +1,1162 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quran Surah Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #d1fae5 0%, #99f6e4 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #065f46;
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #065f46;
+            font-size: 24px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #4b5563;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .score-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            color: #4b5563;
+            font-size: 14px;
+        }
+
+        .button {
+            width: 100%;
+            background: #059669;
+            color: white;
+            font-weight: 600;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+            margin-bottom: 15px;
+        }
+
+        .button:hover {
+            background: #047857;
+        }
+
+        .button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .button-secondary {
+            background: #0d9488;
+        }
+
+        .button-secondary:hover {
+            background: #0f766e;
+        }
+
+        .button-text {
+            background: transparent;
+            color: #4b5563;
+            padding: 10px;
+        }
+
+        .button-text:hover {
+            background: transparent;
+            color: #1f2937;
+        }
+
+        .button-description {
+            font-size: 14px;
+            font-weight: 400;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 18px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #059669;
+        }
+
+        .feedback {
+            padding: 24px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .feedback-correct {
+            background: #d1fae5;
+        }
+
+        .feedback-incorrect {
+            background: #fee2e2;
+        }
+
+        .feedback-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .feedback-icon {
+            font-size: 32px;
+        }
+
+        .feedback-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .feedback-title-correct {
+            color: #065f46;
+        }
+
+        .feedback-title-incorrect {
+            color: #991b1b;
+        }
+
+        .feedback-text {
+            color: #374151;
+        }
+
+        .feedback-answer {
+            font-weight: bold;
+        }
+
+        .final-score {
+            text-align: center;
+        }
+
+        .score-number {
+            font-size: 64px;
+            font-weight: bold;
+            color: #0d9488;
+            margin: 20px 0;
+        }
+
+        .score-message {
+            font-size: 20px;
+            color: #374151;
+            margin-bottom: 30px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="modeScreen">
+            <h1>Quran Surah Quiz</h1>
+            <p class="subtitle">Test your knowledge of the 114 Surahs of the Holy Quran</p>
+            <button class="button" onclick="startQuiz('number-to-name')">
+                Surah Number → Name
+                <div class="button-description">I'll give you a number, you name the Surah</div>
+            </button>
+            <button class="button button-secondary" onclick="startQuiz('name-to-number')">
+                Surah Name → Number
+                <div class="button-description">I'll give you a name, you guess the number</div>
+            </button>
+        </div>
+
+        <div id="quizScreen" class="hidden">
+<div class="score-bar" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+    <span>Score: <span id="score">0/0</span></span>
+    <span>Progress: <span id="progress">0/114</span></span>
+    <span>Known: <span id="known">0</span></span>
+    <span>Remaining: <span id="remaining">114</span></span>
+</div>
+            <h2 id="question"></h2>
+            <div id="answerSection">
+                <input type="text" id="answerInput" class="input" placeholder="Your answer">
+                <button class="button" onclick="checkAnswer()">Submit Answer</button>
+            </div>
+            <div id="feedbackSection" class="hidden">
+                <div id="feedbackBox" class="feedback"></div>
+                <button class="button button-secondary" onclick="nextQuestion()">Next Question</button>
+            </div>
+            <button class="button button-text" onclick="resetQuiz()">Exit Quiz</button>
+        </div>
+
+        <div id="completeScreen" class="hidden">
+            <div class="final-score">
+                <h2>Quiz Complete! 🎉</h2>
+                <div class="score-number" id="finalScore"></div>
+                <p class="score-message" id="finalMessage"></p>
+                <button class="button" onclick="resetQuiz()">
+                    🔄 Start New Quiz
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var surahs = [
+            "Al-Fatihah", "Al-Baqarah", "Ali 'Imran", "An-Nisa", "Al-Ma'idah", "Al-An'am",
+            "Al-A'raf", "Al-Anfal", "At-Tawbah", "Yunus", "Hud", "Yusuf", "Ar-Ra'd",
+            "Ibrahim", "Al-Hijr", "An-Nahl", "Al-Isra", "Al-Kahf", "Maryam", "Ta-Ha",
+            "Al-Anbya", "Al-Hajj", "Al-Mu'minun", "An-Nur", "Al-Furqan", "Ash-Shu'ara",
+            "An-Naml", "Al-Qasas", "Al-'Ankabut", "Ar-Rum", "Luqman", "As-Sajdah",
+            "Al-Ahzab", "Saba", "Fatir", "Ya-Sin", "As-Saffat", "Sad", "Az-Zumar",
+            "Ghafir", "Fussilat", "Ash-Shuraa", "Az-Zukhruf", "Ad-Dukhan", "Al-Jathiyah",
+            "Al-Ahqaf", "Muhammad", "Al-Fath", "Al-Hujurat", "Qaf", "Adh-Dhariyat",
+            "At-Tur", "An-Najm", "Al-Qamar", "Ar-Rahman", "Al-Waqi'ah", "Al-Hadid",
+            "Al-Mujadila", "Al-Hashr", "Al-Mumtahanah", "As-Saf", "Al-Jumu'ah",
+            "Al-Munafiqun", "At-Taghabun", "At-Talaq", "At-Tahrim", "Al-Mulk",
+            "Al-Qalam", "Al-Haqqah", "Al-Ma'arij", "Nuh", "Al-Jinn", "Al-Muzzammil",
+            "Al-Muddaththir", "Al-Qiyamah", "Al-Insan", "Al-Mursalat", "An-Naba",
+            "An-Nazi'at", "Abasa", "Takwir", "Al-Infitar", "Al-Mutaffifin", "Al-Inshiqaq",
+            "Al-Buruj", "At-Tariq", "Al-A'la", "Al-Ghashiyah", "Al-Fajr", "Al-Balad",
+            "Ash-Shams", "Al-Layl", "Ad-Duhaa", "Ash-Sharh", "At-Tin", "Al-'Alaq",
+            "Al-Qadr", "Al-Bayyinah", "Az-Zalzalah", "Al-'Adiyat", "Al-Qari'ah",
+            "At-Takathur", "Al-'Asr", "Al-Humazah", "Al-Fil", "Quraysh", "Al-Ma'un",
+            "Al-Kawthar", "Al-Kafirun", "An-Nasr", "Al-Masad", "Al-Ikhlas", "Al-Falaq",
+            "An-Nas"
+        ];
+
+        var arabicNames = [
+            "الفَاتِحَة", "البَقَرَة", "آل عِمْرَان", "النِّسَاء", "المَائِدَة", "الأَنْعَام",
+            "الأَعْرَاف", "الأَنْفَال", "التَّوْبَة", "يُونُس", "هُود", "يُوسُف", "الرَّعْد",
+            "إِبْرَاهِيم", "الحِجْر", "النَّحْل", "الإِسْرَاء", "الكَهْف", "مَرْيَم", "طه",
+            "الأَنْبِيَاء", "الحَجّ", "المُؤْمِنُون", "النُّور", "الفُرْقَان", "الشُّعَرَاء",
+            "النَّمْل", "القَصَص", "العَنْكَبُوت", "الرُّوم", "لُقْمَان", "السَّجْدَة",
+            "الأَحْزَاب", "سَبَأ", "فَاطِر", "يس", "الصَّافَّات", "ص", "الزُّمَر",
+            "غَافِر", "فُصِّلَت", "الشُّورَىٰ", "الزُّخْرُف", "الدُّخَان", "الجَاثِيَة",
+            "الأَحْقَاف", "مُحَمَّد", "الفَتْح", "الحُجُرَات", "ق", "الذَّارِيَات",
+            "الطُّور", "النَّجْم", "القَمَر", "الرَّحْمَٰن", "الوَاقِعَة", "الحَدِيد",
+            "المُجَادِلَة", "الحَشْر", "المُمْتَحَنَة", "الصَّف", "الجُمُعَة",
+            "المُنَافِقُون", "التَّغَابُن", "الطَّلَاق", "التَّحْرِيم", "المُلْك",
+            "القَلَم", "الحَاقَّة", "المَعَارِج", "نُوح", "الجِنّ", "المُزَّمِّل",
+            "المُدَّثِّر", "القِيَامَة", "الإِنْسَان", "المُرْسَلَات", "النَّبَأ",
+            "النَّازِعَات", "عَبَسَ", "عَلَىٰ", "الانْفِطَار", "المُطَفِّفِين", "الانْشِقَاق",
+            "البُرُوج", "الطَّارِق", "الأَعْلَىٰ", "الغَاشِيَة", "الفَجْر", "البَلَد",
+            "الشَّمْس", "اللَّيْل", "الضُّحَىٰ", "الشَّرْح", "التِّين", "العَلَق",
+            "القَدْر", "البَيِّنَة", "الزَّلْزَلَة", "العَادِيَات", "القَارِعَة",
+            "التَّكَاثُر", "العَصْر", "الهُمَزَة", "الفِيل", "قُرَيْش", "المَاعُون",
+            "الكَوْثَر", "الكَافِرُون", "النَّصْر", "المَسَد", "الإِخْلَاص", "الفَلَق",
+            "النَّاس"
+        ];
+
+        var turkishNames = [
+            "Fatiha", "Bakara", "Ali İmran", "Nisa", "Maide", "Enam",
+            "Araf", "Enfal", "Tevbe", "Yunus", "Hud", "Yusuf", "Rad",
+            "İbrahim", "Hicr", "Nahl", "İsra", "Kehf", "Meryem", "Taha",
+            "Enbiya", "Hacc", "Muminun", "Nur", "Furkan", "Şuara",
+            "Neml", "Kasas", "Ankebut", "Rum", "Lokman", "Secde",
+            "Ahzab", "Sebe", "Fatır", "Yasin", "Saffat", "Sad", "Zümer",
+            "Mümin", "Fussilet", "Şura", "Zuhruf", "Duhan", "Casiye",
+            "Ahkaf", "Muhammed", "Fetih", "Hucurat", "Kaf", "Zariyat",
+            "Tur", "Necm", "Kamer", "Rahman", "Vakia", "Hadid",
+            "Mücadele", "Haşr", "Mümtehine", "Saff", "Cuma",
+            "Münafikun", "Teğabun", "Talak", "Tahrim", "Mülk",
+            "Kalem", "Hakka", "Mearic", "Nuh", "Cin", "Müzzemmil",
+            "Müddessir", "Kıyame", "İnsan", "Mürselat", "Nebe",
+            "Naziat", "Abese", "Tekvir", "İnfitar", "Mutaffifin", "İnşikak",
+            "Buruc", "Tarık", "Ala", "Ğaşiye", "Fecr", "Beled",
+            "Şems", "Leyl", "Duha", "İnşirah", "Tin", "Alak",
+            "Kadir", "Beyyine", "Zilzal", "Adiyat", "Karia",
+            "Tekasür", "Asr", "Hümeze", "Fil", "Kureyş", "Maun",
+            "Kevser", "Kafirun", "Nasr", "Mesed", "İhlas", "Felak",
+            "Nas"
+        ];
+
+ var mnemonics = [
+            // Al-Fatihah (1)
+            [
+                "The OPENING - First surah, #1",
+                "Think: 1st prayer = 1st surah (Al-Fatihah)",
+                "FAT-ihah = Number ONE (1) to start your day"
+            ],
+            // Al-Baqarah (2)
+            [
+                "The COW - Longest surah, #2",
+                "Think: 2 horns on a COW = Surah #2",
+                "BAQ-arah sounds like 'BACK' = Go BACK to #2, the longest"
+            ],
+            // Ali Imran (3)
+            [
+                "Family of IMRAN - #3, after Al-Baqarah",
+                "Think: Ali Imran = 3 words in Arabic name = #3",
+                "Imran's family (3 letters: A-L-I) = Surah #3"
+            ],
+            // An-Nisa (4)
+            [
+                "The WOMEN - #4, focuses on women's rights",
+                "Think: 4 wives allowed in Islam = Surah #4 (An-Nisa)",
+                "NISA = 4 letters = Surah #4"
+            ],
+            // Al-Ma'idah (5)
+            [
+                "The TABLE - #5, mentions the table spread",
+                "Think: 5 daily prayers around the TABLE = #5",
+                "Ma'idah = TABLE with 5 pillars of Islam = #5"
+            ],
+            // Al-An'am (6)
+            [
+                "The CATTLE - #6, discusses livestock",
+                "Think: 6 types of cattle mentioned = #6",
+                "AN'AM = 6 major livestock animals = Surah #6"
+            ],
+            // Al-A'raf (7)
+            [
+                "The HEIGHTS - #7, about elevated places",
+                "Think: 7 heavens, A'raf is the HEIGHT = #7",
+                "A'RAF = Elevated barrier = 7th position in Quran"
+            ],
+            // Al-Anfal (8)
+            [
+                "The SPOILS OF WAR - #8, revealed after Badr",
+                "Think: 8th surah about the 8th battle profit distribution",
+                "AN-FAL = War spoils after Battle of Badr (#8)"
+            ],
+            // At-Tawbah (9)
+            [
+                "The REPENTANCE - #9, only surah without Bismillah",
+                "Think: 9 is divine number, REPENT at #9",
+                "TAWBAH = Repentance, 9 letters in English"
+            ],
+            // Yunus (10)
+            [
+                "YUNUS (Jonah) - #10, prophet's story",
+                "Think: YU-NUS = YOU + NUS = 10 in binary (1-0)",
+                "YUNUS = 5 letters, double it = 10"
+            ],
+            // Hud (11)
+            [
+                "HUD - #11, prophet Hud's name",
+                "Think: HUD = 3 letters, add 8 more = 11",
+                "Prophet HUD lived 11 generations after Noah"
+            ],
+            // Yusuf (12)
+            [
+                "YUSUF (Joseph) - #12, beautiful story",
+                "Think: 12 brothers in Yusuf's story = #12",
+                "YUSUF had 11 brothers, he's the 12th = Surah #12"
+            ],
+            // Ar-Ra'd (13)
+            [
+                "The THUNDER - #13, mentions thunder",
+                "Think: RA'D = Thunder strikes = Unlucky #13",
+                "THUNDER = Loud like number 13 (teen)"
+            ],
+            // Ibrahim (14)
+            [
+                "IBRAHIM (Abraham) - #14, prophet Ibrahim",
+                "Think: IBRAHIM = 7 letters × 2 = 14",
+                "Father IBRAHIM at position 14 (1+4=5 pillars)"
+            ],
+            // Al-Hijr (15)
+            [
+                "The ROCKY TRACT - #15, in middle of Quran",
+                "Think: HIJR = Rocky = 1 and 5 = #15",
+                "15 = Middle teen number, middle of Quran section"
+            ],
+            // An-Nahl (16)
+            [
+                "The BEE - #16, mentions bees and honey",
+                "Think: NAHL = 16 cells in honeycomb section",
+                "Sweet 16 = Sweet honey from BEES = #16"
+            ],
+            // Al-Isra (17)
+            [
+                "The NIGHT JOURNEY - #17, Isra and Mi'raj",
+                "Think: ISRA = Journey to 17th step of heaven",
+                "Night journey on 27th night, subtract 10 = 17"
+            ],
+            // Al-Kahf (18)
+            [
+                "The CAVE - #18, story of cave sleepers",
+                "Think: KAHF = 18 years in the cave",
+                "18 = Age when youth entered the CAVE"
+            ],
+            // Maryam (19)
+            [
+                "MARYAM (Mary) - #19, only surah named after a woman",
+                "Think: MARYAM = 19 years when Jesus born",
+                "19 = Coming of age, MARYAM's purity = #19"
+            ],
+            // Ta-Ha (20)
+            [
+                "TA-HA - #20, mysterious letters",
+                "Think: TA-HA = 2 letters, multiply by 10 = 20",
+                "20 = Round number like T and H circles = #20"
+            ],
+            // Al-Anbya (21)
+            [
+                "The PROPHETS - #21, mentions many prophets",
+                "Think: 21 = Age of maturity for PROPHETS",
+                "ANBIYA = 21 prophets stories combined"
+            ],
+            // Al-Hajj (22)
+            [
+                "The PILGRIMAGE - #22, about Hajj",
+                "Think: HAJJ on 22nd day preparation starts",
+                "22 = Two 2s = Two circles around Kaaba"
+            ],
+            // Al-Mu'minun (23)
+            [
+                "The BELIEVERS - #23, describes true believers",
+                "Think: MU'MINUN = 23 qualities of believers",
+                "23 = Believers pray 23 hours protected by Allah"
+            ],
+            // An-Nur (24)
+            [
+                "The LIGHT - #24, contains verse of light",
+                "Think: NUR = LIGHT = 24 hours of divine light",
+                "24 = Full day cycle of LIGHT and darkness"
+            ],
+            // Al-Furqan (25)
+            [
+                "The CRITERION - #25, distinguishing right from wrong",
+                "Think: FURQAN = Quarter century of wisdom = 25",
+                "25 = Mid-life CRITERION for truth = #25"
+            ],
+            // Ash-Shu'ara (26)
+            [
+                "The POETS - #26, mentions poets",
+                "Think: 26 letters in alphabet, POETS use all = #26",
+                "SHU'ARA = 26 verses about poetry"
+            ],
+            // An-Naml (27)
+            [
+                "The ANTS - #27, story includes ants",
+                "Think: NAML = 27th night of Laylatul Qadr with ants",
+                "27 = Odd number like odd legs on ANTS seen = #27"
+            ],
+            // Al-Qasas (28)
+            [
+                "The NARRATION - #28, story of Musa",
+                "🕸️ Think: Ant → Story → Spider — Surah 28 is the bridge story between two creatures",
+                "28 = Complete month cycle of NARRAT🧩 Qasas (Stories) — comes right after An-Naml (The Ants, #27) and before Al-Ankabut (The Spider, #29)"
+            ],
+            // Al-Ankabut (29)
+            [
+                "The SPIDER - #29, mentions spider's web",
+                "Think: ANKABUT = 29 days to spin complete web",
+                "29 = Lunar month end, fragile like SPIDER web"
+            ],
+            // Ar-Rum (30)
+            [
+                "The ROMANS - #30, prophecy about Romans",
+                "Think: RUM = ROMANS = 30 years rule prophecy",
+                "30 = Mature age, ROMANS matured at #30"
+            ],
+            // Luqman (31)
+            [
+                "LUQMAN - #31, wise man's advice",
+                "Think: LUQMAN = 31 pieces of wisdom shared",
+                "31 = Maximum days in month, maximum WISDOM"
+            ],
+            // As-Sajdah (32)
+            [
+                "The PROSTRATION - #32, recommended for Fajr",
+                "Think: SAJDAH = 32 teeth touch ground in prostration",
+                "32 = Number of sajdah posture perfection = #32"
+            ],
+            // Al-Ahzab (33)
+            [
+                "The ALLIES - #33, Battle of Trench",
+                "Think: AHZAB = 33 allied tribes attacked",
+                "33 = Age Prophet married, ALLIES formed = #33"
+            ],
+            // Saba (34)
+            [
+                "SHEBA - #34, Queen of Sheba",
+                "Think: SABA = 34 years Queen ruled",
+                "34 = 3+4=7 wonders, SHEBA one of them = #34"
+            ],
+            // Fatir (35)
+            [
+                "The ORIGINATOR - #35, Allah creates all",
+                "Think: FATIR = 35 ways Allah creates",
+                "35 = 5×7, perfect CREATION number = #35"
+            ],
+            // Ya-Sin (36)
+            [
+                "YA-SIN - #36, 'Heart of the Quran'",
+                "Think: 36 = Half of 72, YA-SIN at heart position",
+                "YA-SIN = 36 degrees of heart's warmth"
+            ],
+            // As-Saffat (37)
+            [
+                "Those RANGED in ROWS - #37, angels in ranks",
+                "Think: SAFFAT = 37 rows of angels standing",
+                "37 = Prime number, RANKS of prime angels"
+            ],
+            // Sad (38)
+            [
+                "The Letter SAD - #38, starts with ص",
+                "Think: SAD = ص = 38th letter position",
+                "38 = 3+8=11, SAD ص curves 11 times"
+            ],
+            // Az-Zumar (39)
+            [
+                "The GROUPS - #39, people in groups",
+                "Think: ZUMAR = 39 groups on judgment day",
+                "39 = 3×13, three GROUPS of 13 = #39"
+            ],
+            // Ghafir (40)
+            [
+                "The FORGIVER - #40, Allah is forgiving",
+                "Think: 40 days of FORGIVENESS seeking",
+                "GHAFIR = 40 years old, age of wisdom and FORGIVENESS"
+            ],
+            // Fussilat (41)
+            [
+                "EXPLAINED in DETAIL - #41, verses explained",
+                "Think: FUSSILAT = 41 detailed explanations",
+                "41 = 40+1, one more DETAIL explained = #41"
+            ],
+            // Ash-Shuraa (42)
+            [
+                "The CONSULTATION - #42, mutual consultation",
+                "Think: SHURAA = 42 elders in consultation",
+                "42 = Answer to everything (Hitchhiker's), CONSULT at #42"
+            ],
+            // Az-Zukhruf (43)
+            [
+                "The GOLD - #43, mentions gold ornaments",
+                "Think: ZUKHRUF = 43 karats of pure GOLD",
+                "43 = Gold standard number of decoration"
+            ],
+            // Ad-Dukhan (44)
+            [
+                "The SMOKE - #44, day of smoke coming",
+                "Think: DUKHAN = 44 clouds of SMOKE appear",
+                "44 = Two 4s, double SMOKE clouds = #44"
+            ],
+            // Al-Jathiyah (45)
+            [
+                "The KNEELING - #45, nations on knees",
+                "Think: JATHIYAH = 45 degree KNEELING angle",
+                "45 = Perfect angle to KNEEL in submission"
+            ],
+            // Al-Ahqaf (46)
+            [
+                "The CURVED SAND-HILLS - #46, wind and dunes",
+                "Think: AHQAF = 46 meter high SAND dunes",
+                "46 = 4+6=10, ten CURVED hills = #46"
+            ],
+            // Muhammad (47)
+            [
+                "MUHAMMAD ﷺ - #47, Prophet's name",
+                "Think: MUHAMMAD = 47 years when revelation started",
+                "47 = 40 (prophethood) + 7 (perfection) = #47"
+            ],
+            // Al-Fath (48)
+            [
+                "The VICTORY - #48, Treaty of Hudaybiyyah",
+                "Think: FATH = VICTORY in 48 hours",
+                "48 = 4×12, complete cycle of VICTORY"
+            ],
+            // Al-Hujurat (49)
+            [
+                "The ROOMS - #49, private chambers etiquette",
+                "Think: HUJURAT = 49 ROOMS in Prophet's mosque",
+                "49 = 7×7, perfect square of ROOMS = #49"
+            ],
+            // Qaf (50)
+            [
+                "The Letter QAF - #50, starts with ق (halfway!)",
+                "Think: QAF = ق = 50th position, HALFWAY through Quran",
+                "50 = Half century, QAF at middle point"
+            ],
+            // Adh-Dhariyat (51)
+            [
+                "The SCATTERING WINDS - #51, winds that scatter",
+                "Think: DHARIYAT = 51 types of WINDS blow",
+                "51 = Area 51, mysterious like SCATTERING winds"
+            ],
+            // At-Tur (52)
+            [
+                "The MOUNT - #52, Mount Sinai",
+                "Think: TUR = 52 weeks to climb MOUNT yearly",
+                "52 = Cards in deck, TUR like mountain deck"
+            ],
+            // An-Najm (53)
+            [
+                "The STAR - #53, by the star when it descends",
+                "Think: NAJM = 53 STARS in constellation",
+                "53 = Prime number, STAR is prime in sky"
+            ],
+            // Al-Qamar (54)
+            [
+                "The MOON - #54, moon was split",
+                "Think: QAMAR = 54 degrees MOON angle when split",
+                "54 = 5+4=9, MOON phases cycle"
+            ],
+            // Ar-Rahman (55)
+            [
+                "The MOST MERCIFUL - #55, repeated 'Which favors?'",
+                "Think: RAHMAN = 55 mercies Allah mentions",
+                "55 = Double 5, double MERCY of Rahman"
+            ],
+            // Al-Waqi'ah (56)
+            [
+                "The EVENT - #56, the inevitable event",
+                "Think: WAQI'AH = 56 signs of the EVENT coming",
+                "56 = 7×8, perfect timing of EVENT = #56"
+            ],
+            // Al-Hadid (57)
+            [
+                "The IRON - #57, iron sent down",
+                "Think: HADID = IRON atomic number 26, double=52, +5=57",
+                "57 = Strong number for IRON strength"
+            ],
+            // Al-Mujadila (58)
+            [
+                "The PLEADING WOMAN - #58, woman's plea heard",
+                "Think: MUJADILA = 58 words in woman's PLEA",
+                "58 = 5+8=13, unlucky turned lucky by PLEA"
+            ],
+            // Al-Hashr (59)
+            [
+                "The GATHERING - #59, banishment gathering",
+                "Think: HASHR = 59 people GATHERED for exile",
+                "59 = Prime number, prime GATHERING = #59"
+            ],
+            // Al-Mumtahanah (60)
+            [
+                "The EXAMINED ONE - #60, test of faith",
+                "Think: MUMTAHANAH = 60 minute EXAM of faith",
+                "60 = One hour EXAMINATION period = #60"
+            ],
+            // As-Saf (61)
+            [
+                "The RANKS - #61, solid ranks in battle",
+                "Think: SAF = 61 soldiers in battle RANK",
+                "61 = 6+1=7, perfect RANK number"
+            ],
+            // Al-Jumu'ah (62)
+            [
+                "FRIDAY - #62, day of Jumu'ah",
+                "Think: JUMU'AH = 62 minutes for Friday prayer",
+                "62 = 6th day, 2nd prayer time = FRIDAY"
+            ],
+            // Al-Munafiqun (63)
+            [
+                "The HYPOCRITES - #63, about munafiqun",
+                "Think: MUNAFIQUN = 63 traits of HYPOCRITES",
+                "63 = 6+3=9, nine types of HYPOCRISY"
+            ],
+            // At-Taghabun (64)
+            [
+                "The MUTUAL LOSS - #64, loss and gain",
+                "Think: TAGHABUN = 64 squares on chessboard of LOSS/GAIN",
+                "64 = Perfect square for MUTUAL exchange"
+            ],
+            // At-Talaq (65)
+            [
+                "The DIVORCE - #65, divorce rulings",
+                "Think: TALAQ = 65 days waiting period rules",
+                "65 = Retirement age, DIVORCE and restart"
+            ],
+            // At-Tahrim (66)
+            [
+                "The PROHIBITION - #66, Prophet's oath",
+                "Think: TAHRIM = 66 things PROHIBITED listed",
+                "66 = Route 66, PROHIBITION era number"
+            ],
+            // Al-Mulk (67)
+            [
+                "The SOVEREIGNTY - #67, blessed is He who has dominion",
+                "Think: MULK = 67 verses of kingdom SOVEREIGNTY",
+                "67 = 6+7=13, unlucky without Allah's DOMINION"
+            ],
+            // Al-Qalam (68)
+            [
+                "The PEN - #68, nun and the pen",
+                "Think: QALAM = PEN writes at 68 degrees angle",
+                "68 = 6+8=14 centuries of PEN writing Quran"
+            ],
+            // Al-Haqqah (69)
+            [
+                "The INEVITABLE - #69, the sure reality",
+                "Think: HAQQAH = 69 names for INEVITABLE judgment",
+                "69 = Yin yang balance of REALITY = #69"
+            ],
+            // Al-Ma'arij (70)
+            [
+                "The ASCENDING STAIRWAYS - #70, angels ascend",
+                "Think: MA'ARIJ = 70 steps of ASCENDING stairway",
+                "70 = Biblical lifespan, ASCEND after 70 years"
+            ],
+            // Nuh (71)
+            [
+                "NOAH - #71, Prophet Nuh's story",
+                "Think: NUH = 71 years old when flood warned",
+                "71 = Reverse 17, NUH's covenant reverse test"
+            ],
+            // Al-Jinn (72)
+            [
+                "The JINN - #72, jinn heard Quran",
+                "Think: JINN = 72 types of JINN species exist",
+                "72 = Houris number, JINN also tested"
+            ],
+            // Al-Muzzammil (73)
+            [
+                "The WRAPPED ONE - #73, O you wrapped in garments",
+                "Think: MUZZAMMIL = 73 blankets WRAPPED for night prayer",
+                "73 = 7+3=10, perfect WRAPPED prayer hours"
+            ],
+            // Al-Muddaththir (74)
+            [
+                "The CLOAKED ONE - #74, O you in your cloak",
+                "Think: MUDDATHTHIR = 74 folds in CLOAK fabric",
+                "74 = 7+4=11, CLOAKED in 11 directions"
+            ],
+            // Al-Qiyamah (75)
+            [
+                "The RESURRECTION - #75, Day of Rising",
+                "Think: QIYAMAH = 75 years until RESURRECTION signs",
+                "75 = 3×25, three quarter century to RISING"
+            ],
+            // Al-Insan (76)
+            [
+                "THE HUMAN - #76, about creation of man",
+                "Think: INSAN = 76 organs in HUMAN body",
+                "76 = 7+6=13 blood types, HUMAN diversity"
+            ],
+            // Al-Mursalat (77)
+            [
+            "Those SENT FORTH - #77, winds sent forth",
+             "🧭 Al-Mursalat sits right after Al-Insan (#76) and before An-Naba (#78).",
+"🧑‍🤝‍🧑 In Al-Insan, Allah describes how humans were created and what their destiny is.",
+"🌬️ Then Al-Mursalat comes — winds and angels are sent forth as messengers to remind that destiny.",
+"🌋 And next, An-Naba (#78) arrives — “The Great News” of the Day of Judgment that those messages warned about.",
+"✨ So #77 acts as the messenger bridge — between human creation (76) and divine news (78)"
+            ],
+        // An-Naba (78)
+[
+    "🧩 *An-Naba* (#78) — “The Great News”",
+    "🌬️ Follows *Al-Mursalat* (#77), where winds and angels are sent forth with messages.",
+    "📣 Now comes *The News* — what those messengers warned about finally arrives.",
+    "🔢 7 and 8 stand side by side — like two trumpets of Judgment, symbolizing the Great News that awakens all creation.",
+    "🌅 Then *An-Nazi’at* (#79) follows, describing how the souls are pulled — the result of that news.",
+    "👉 Surah 78 bridges the warning (77) and the aftermath (79): the announcement of the ultimate truth."
+],
+
+            // An-Nazi'at (79)
+            [
+                "Those who TEAR OUT - #79, angels extracting souls",
+                "Think: NAZI'AT = 79 souls TORN OUT witnessed",
+                "79 = Prime year of EXTRACTION = #79"
+            ],
+            // Abasa (80)
+            [
+                "HE FROWNED - #80, Prophet frowned at blind man",
+                "Think: ABASA = 80 degree FROWN curve measured",
+                "80 = Old age FROWN lines appear at 80"
+            ],
+            // At-Takwir (81)
+            [
+                "The OVERTHROWING - #81, when sun is overthrown",
+                "Think: TAKWIR = 81 signs of sun OVERTHROWING",
+                "81 = 9×9, perfect square for OVERTHROWING"
+            ],
+            // Al-Infitar (82)
+            [
+                "The CLEAVING - #82, when sky is cleft",
+                "Think: INFITAR = 82 degrees sky CLEAVES open",
+                "82 = 8+2=10, ten parts of CLEAVED sky"
+            ],
+            // Al-Mutaffifin (83)
+            [
+                "The DEFRAUDERS - #83, woe to those who give less",
+                "Think: MUTAFFIFIN = 83 ways of DEFRAUDING listed",
+                "83 = Prime number, prime DEFRAUDERS caught"
+            ],
+            // Al-Inshiqaq (84)
+            [
+                "The SPLITTING OPEN - #84, when sky splits",
+                "Think: INSHIQAQ = 84 parts sky SPLITS into",
+                "84 = 7×12, complete cycle of SPLITTING"
+            ],
+            // Al-Buruj (85)
+            [
+                "The CONSTELLATIONS - #85, by the heaven and constellations",
+                "Think: BURUJ = 85 stars in main CONSTELLATIONS",
+                "85 = 8+5=13, thirteen CONSTELLATIONS visible"
+            ],
+            // At-Tariq (86)
+            [
+                "The NIGHT COMER - #86, by the night and night comer",
+                "Think: TARIQ = 86 night stars that COME at night",
+                "86 = 8+6=14, fourteen phases NIGHT COMER appears"
+            ],
+            // Al-A'la (87)
+            [
+                "The MOST HIGH - #87, glorify your Lord Most High",
+                "Think: A'LA = MOST HIGH = 87 names of highness",
+                "87 = 8+7=15, fifteen levels of MOST HIGH"
+            ],
+            // Al-Ghashiyah (88)
+            [
+                "The OVERWHELMING - #88, the overwhelming event",
+                "Think: GHASHIYAH = 88 ways event OVERWHELMS",
+                "88 = Double infinity, OVERWHELMING endlessly"
+            ],
+            // Al-Fajr (89)
+            [
+                "The DAWN - #89, by the dawn",
+                "Think: FAJR = 89 minutes before sunrise DAWN",
+                "89 = 8+9=17, seventeen colors of DAWN sky"
+            ],
+            // Al-Balad (90)
+            [
+                "The CITY - #90, by this city (Makkah)",
+                "Think: BALAD = 90 degrees Kaaba in CITY angle",
+                "90 = Right angle, CITY layout at 90 degrees"
+            ],
+            // Ash-Shams (91)
+            [
+                "The SUN - #91, by the sun",
+                "Think: SHAMS = SUN = 91 million miles away",
+                "91 = 9+1=10, ten types of SUN rays"
+            ],
+            // Al-Layl (92)
+            [
+                "The NIGHT - #92, by the night when it covers",
+                "Think: LAYL = 92 stars visible on NIGHT sky",
+                "92 = 9+2=11, eleven hours of NIGHT darkness"
+            ],
+            // Ad-Duhaa (93)
+            [
+                "The MORNING BRIGHTNESS - #93, by morning brightness",
+                "Think: DUHAA = 93 lumens of MORNING light",
+                "93 = 9+3=12, twelve noon BRIGHTNESS peak"
+            ],
+            // Ash-Sharh (94)
+            [
+                "The RELIEF - #94, did We not expand your chest?",
+                "Think: SHARH = 94 ways Allah gives RELIEF",
+                "94 = 9+4=13, thirteen types of chest EXPANSION"
+            ],
+            // At-Tin (95)
+            [
+                "The FIG - #95, by the fig and olive",
+                "Think: TIN = FIG = 95 seeds in one fig fruit",
+                "95 = 9+5=14, fourteen nutrients in FIG"
+            ],
+            // Al-Alaq (96)
+            [
+                "The CLINGING CLOT - #96, FIRST revelation! Read!",
+                "Think: ALAQ = 96 hours embryo CLINGS to womb",
+                "96 = 9+6=15, fifteen days CLOT forms completely"
+            ],
+            // Al-Qadr (97)
+            [
+                "The NIGHT OF POWER - #97, better than 1000 months",
+                "Think: QADR = 97th night is 27th of Ramadan (odd)",
+                "97 = Prime number, POWER night is prime blessing"
+            ],
+            // Al-Bayyinah (98)
+            [
+                "The CLEAR EVIDENCE - #98, clear proof came",
+                "Think: BAYYINAH = 98 proofs of CLEAR EVIDENCE",
+                "98 = Almost 100, nearly complete EVIDENCE = #98"
+            ],
+            // Az-Zalzalah (99)
+            [
+                "The EARTHQUAKE - #99, when earth is shaken",
+                "Think: ZALZALAH = 99 on Richter scale EARTHQUAKE",
+                "99 = 9.9 magnitude, massive EARTH shaking"
+            ],
+            // Al-Adiyat (100)
+            [
+                "The RUNNERS - #100, by racing horses",
+                "Think: ADIYAT = 100 meter dash RACING horses",
+                "100 = Century sprint, horses RUN 100 meters"
+            ],
+            // Al-Qari'ah (101)
+            [
+                "The STRIKING HOUR - #101, the striking calamity",
+                "Think: QARI'AH = 101 times of STRIKING warning",
+                "101 = Basic course number, CALAMITY 101"
+            ],
+            // At-Takathur (102)
+            [
+                "GREED FOR MORE - #102, competition in increase",
+                "Think: TAKATHUR = 102 types of GREED described",
+                "102 = 1+0+2=3, three stages of GREED"
+            ],
+            // Al-Asr (103)
+            [
+                "THE TIME - #103, by time, man is in loss",
+                "Think: ASR = TIME = 103 years average human lifespan",
+                "103 = 1+0+3=4, four times we waste TIME"
+            ],
+            // Al-Humazah (104)
+            [
+                "The SLANDERER - #104, woe to every slanderer",
+                "Think: HUMAZAH = 104 forms of SLANDER listed",
+                "104 = 1+0+4=5, five types of SLANDERER"
+            ],
+            // Al-Fil (105)
+            [
+                "The ELEPHANT - #105, year of elephant",
+                "Think: FIL = ELEPHANT = 105 tons can carry",
+                "105 = 1+0+5=6, six years after ELEPHANT event Prophet born"
+            ],
+            // Quraysh (106)
+            [
+                "QURAYSH - #106, for the security of Quraysh",
+                "Think: QURAYSH = 106 families in tribe",
+                "106 = 1+0+6=7, seven leaders of QURAYSH"
+            ],
+            // Al-Ma'un (107)
+            [
+                "SMALL KINDNESS - #107, have you seen the denier?",
+                "Think: MA'UN = 107 small acts of KINDNESS daily",
+                "107 = 1+0+7=8, eight types of SMALL help"
+            ],
+            // Al-Kawthar (108)
+            [
+                "ABUNDANCE - #108, We gave you abundance (Kawthar)",
+                "Think: KAWTHAR = 108 rivers of ABUNDANCE in Jannah",
+                "108 = 1+0+8=9, nine forms of ABUNDANCE given"
+            ],
+            // Al-Kafirun (109)
+            [
+                "The DISBELIEVERS - #109, say O disbelievers",
+                "Think: KAFIRUN = 109 rejections by DISBELIEVERS",
+                "109 = 1+0+9=10, ten clear statements to DISBELIEVERS"
+            ],
+            // An-Nasr (110)
+            [
+                "The HELP - #110, when Allah's help comes",
+                "Think: NASR = 110% effort, then Allah's HELP comes",
+                "110 = Call police (911 reversed), divine HELP"
+            ],
+            // Al-Masad (111)
+            [
+                "The PALM FIBERS - #111, Abu Lahab's wife",
+                "Think: MASAD = 111 twisted PALM FIBERS in rope",
+                "111 = All ones, all tied up in PALM fiber rope"
+            ]
+                ];
+
+        var mode = null;
+        var currentQuestion = null;
+        var score = { correct: 0, total: 0 };
+        var askedQuestions = { 'number-to-name': new Set(), 'name-to-number': new Set() };
+        var knownQuestions = { 'number-to-name': new Set(), 'name-to-number': new Set() };
+
+        function startQuiz(selectedMode) {
+            mode = selectedMode;
+            score = { correct: 0, total: 0 };
+            askedQuestions = { 'number-to-name': new Set(), 'name-to-number': new Set() }; 
+            knownQuestions = { 'number-to-name': new Set(), 'name-to-number': new Set() };
+
+            document.getElementById('modeScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+            
+            generateQuestion();
+        }
+
+        function generateQuestion() {
+          if (knownQuestions[mode].size === 114) {
+    showCompleteScreen();
+    return;
+}
+
+var num;
+do {
+    num = Math.floor(Math.random() * 114) + 1;
+} while (knownQuestions[mode].has(num));
+
+askedQuestions[mode].add(num);
+            currentQuestion = num;
+
+            var questionText = mode === 'number-to-name' 
+                ? 'What is Surah #' + currentQuestion + '?'
+                : 'What number is Surah ' + surahs[currentQuestion - 1] + ' (' + arabicNames[currentQuestion - 1] + ')?';
+
+            document.getElementById('question').textContent = '';
+            var questionEl = document.getElementById('question');
+            if (mode === 'number-to-name') {
+                questionEl.textContent = 'What is Surah #' + currentQuestion + '?';
+            } else {
+                questionEl.innerHTML = 'What number is Surah ' + surahs[currentQuestion - 1] + '<br><span style="font-size: 28px; color: #047857; margin-top: 8px; display: inline-block;">(' + arabicNames[currentQuestion - 1] + ')</span>?';
+            }
+            document.getElementById('answerInput').value = '';
+            document.getElementById('answerInput').placeholder = mode === 'number-to-name' 
+                ? 'Enter Surah name' 
+                : 'Enter number (1-114)';
+            
+            document.getElementById('answerSection').classList.remove('hidden');
+            document.getElementById('feedbackSection').classList.add('hidden');
+            document.getElementById('answerInput').focus();
+
+            updateScoreDisplay();
+        }
+
+        function normalizeAnswer(text) {
+            return text.toLowerCase()
+                .replace(/['-]/g, '')
+                .replace(/^(al|an|ar|at|as|ash|adh|az|ad)[\s-]*/i, '')
+                .replace(/ı/g, 'i')
+                .replace(/ğ/g, 'g')
+                .replace(/ü/g, 'u')
+                .replace(/ş/g, 's')
+                .replace(/ö/g, 'o')
+                .replace(/ç/g, 'c')
+                .trim();
+        }
+
+function checkAnswer() {
+    var userAnswer = document.getElementById('answerInput').value.trim();
+    if (!userAnswer) return;
+
+    var isCorrect = false;
+    
+    if (mode === 'number-to-name') {
+        var normalizedUser = normalizeAnswer(userAnswer);
+        var normalizedArabic = normalizeAnswer(surahs[currentQuestion - 1]);
+        var normalizedTurkish = normalizeAnswer(turkishNames[currentQuestion - 1]);
+        
+        isCorrect = normalizedUser === normalizedArabic || normalizedUser === normalizedTurkish;
+    } else {
+        isCorrect = userAnswer === currentQuestion.toString();
+    }
+
+    score.total++;  // Only here, once
+    if (isCorrect) {
+        score.correct++;
+        knownQuestions[mode].add(currentQuestion);
+    }
+
+    showFeedback(isCorrect);
+    updateScoreDisplay();
+}
+
+        function showFeedback(isCorrect) {
+            var correctAnswer = mode === 'number-to-name' 
+                ? surahs[currentQuestion - 1] 
+                : currentQuestion;
+
+            var feedbackBox = document.getElementById('feedbackBox');
+            feedbackBox.className = 'feedback ' + (isCorrect ? 'feedback-correct' : 'feedback-incorrect');
+            
+            var html = '<div class="feedback-header">';
+            html += '<span class="feedback-icon">' + (isCorrect ? '✓' : '✗') + '</span>';
+            html += '<span class="feedback-title ' + (isCorrect ? 'feedback-title-correct' : 'feedback-title-incorrect') + '">';
+            html += isCorrect ? 'Correct!' : 'Incorrect';
+            html += '</span></div>';
+            
+            if (!isCorrect) {
+                if (mode === 'number-to-name') {
+                    html += '<p class="feedback-text">The correct answer is: <span class="feedback-answer">' + correctAnswer + ' (' + arabicNames[currentQuestion - 1] + ')</span></p>';
+                } else {
+                    html += '<p class="feedback-text">The correct answer is: <span class="feedback-answer">#' + correctAnswer + '</span></p>';
+                }
+html += '<p class="feedback-text" style="margin-top: 12px; padding: 12px; background: rgba(255,255,255,0.5); border-radius: 8px; font-style: italic; white-space: pre-line;">💡 ' 
+     + mnemonics[currentQuestion - 1].join('\n') + '</p>';
+            }
+            
+            feedbackBox.innerHTML = html;
+
+            document.getElementById('answerSection').classList.add('hidden');
+            document.getElementById('feedbackSection').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            generateQuestion();
+        }
+
+ function updateScoreDisplay() {
+    document.getElementById('score').textContent = score.correct + '/' + score.total;
+    document.getElementById('progress').textContent = askedQuestions[mode].size + '/114';
+    document.getElementById('known').textContent = knownQuestions[mode].size;
+    document.getElementById('remaining').textContent = (114 - knownQuestions[mode].size);
+}
+
+        function showCompleteScreen() {
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('completeScreen').classList.remove('hidden');
+            
+            document.getElementById('finalScore').textContent = score.correct + '/' + score.total;
+            
+            var percentage = score.correct / score.total;
+            var message;
+            if (score.correct === score.total) {
+                message = "Perfect score! Masha'Allah!";
+            } else if (percentage >= 0.8) {
+                message = "Excellent work!";
+            } else if (percentage >= 0.6) {
+                message = "Good job!";
+            } else {
+                message = "Keep practicing!";
+            }
+            document.getElementById('finalMessage').textContent = message;
+        }
+
+        function resetQuiz() {
+            mode = null;
+            currentQuestion = null;
+            score = { correct: 0, total: 0 };
+askedQuestions = { 'number-to-name': new Set(), 'name-to-number': new Set() };  
+knownQuestions = { 'number-to-name': new Set(), 'name-to-number': new Set() };
+
+            document.getElementById('modeScreen').classList.remove('hidden');
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('completeScreen').classList.add('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('answerInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkAnswer();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
